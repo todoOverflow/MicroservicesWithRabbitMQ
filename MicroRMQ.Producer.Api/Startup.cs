@@ -15,6 +15,7 @@ using Swashbuckle.AspNetCore.Swagger;
 using Microsoft.EntityFrameworkCore;
 using MediatR;
 using MicroRMQ.Producer.Application;
+using MicroRMQ.Bus;
 
 namespace MicroRMQ.Producer.Api
 {
@@ -37,6 +38,7 @@ namespace MicroRMQ.Producer.Api
             });
             services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
             services.AddMediatR(typeof(AccountList).Assembly);
+            services.AddSingleton<IEventBus, RabbitMQBus>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

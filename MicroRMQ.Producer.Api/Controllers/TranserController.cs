@@ -18,11 +18,17 @@ namespace MicroRMQ.Producer.Api.Controllers
         }
 
         [HttpGet]
-        [Route("accountlist")]
+        [Route("AccountList")]
         public async Task<ActionResult<List<Account>>> List()
         {
             return await _mediator.Send(new AccountList.Query());
         }
 
+        [HttpPost]
+        [Route("CreateTransfer")]
+        public async Task<ActionResult<Unit>> Create([FromBody] CreateTransfer.Command command)
+        {
+            return await _mediator.Send(command);
+        }
     }
 }
