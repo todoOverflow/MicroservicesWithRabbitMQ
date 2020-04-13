@@ -9,6 +9,6 @@ namespace MicroRMQ.Bus
     }
     public interface IEventHandler<in TEvent> : IEventHandler where TEvent : Event
     {
-        Task Handler(TEvent @event);
+        Task Handle(TEvent @event);
     }
 }

@@ -1,20 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
+﻿using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Swashbuckle.AspNetCore.Swagger;
-using MicorRMQ.Consumer.Persistence;
-using MicorRMQ.Consumer.Application;
-using Microsoft.EntityFrameworkCore;
+
 using MediatR;
+
+using MicorRMQ.Consumer.Persistence;
+
+using MicroRMQ.Bus;
+using MicorRMQ.Consumer.Application;
+using MicorRMQ.Consumer.Domain;
+
+using Swashbuckle.AspNetCore.Swagger;
 namespace MicorRMQ.Consumer.Api
 {
     public class Startup
@@ -39,6 +38,13 @@ namespace MicorRMQ.Consumer.Api
                 c.SwaggerDoc("v1", new Info { Title = "Transfer Consumer Microservice", Version = "v1" });
             });
             services.AddMediatR(typeof(TransferList.Query).Assembly);
+            services.AddSingleton<IEventBus, RabbitMQBus>(sp =>
+            {
+                var scopeFactory = sp.GetRequiredService<IServiceScopeFactory>();
+                return new RabbitMQBus(scopeFactory);
+            });
+            services.AddTransient<TransferEventHandler>();
+            //services.AddTransient<IEventHandler<TransferEvent>, TransferEventHandler>();
 
         }
 
@@ -62,6 +68,13 @@ namespace MicorRMQ.Consumer.Api
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "Transfer Consumer Microservice V1");
             });
             app.UseMvc();
+            ConfigureEventBus(app);
+        }
+
+        private void ConfigureEventBus(IApplicationBuilder app)
+        {
+            var eventBus = app.ApplicationServices.GetRequiredService<IEventBus>();
+            eventBus.Subscribe<TransferEvent, TransferEventHandler>();
         }
     }
 }

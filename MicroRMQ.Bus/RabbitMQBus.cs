@@ -16,6 +16,13 @@ namespace MicroRMQ.Bus
         private readonly Dictionary<string, List<Type>> _handlerTypes;
         private readonly IServiceScopeFactory _serviceScopeFactory;
 
+        public RabbitMQBus(IServiceScopeFactory serviceScopeFactory)
+        {
+            _serviceScopeFactory = serviceScopeFactory;
+            _eventTypes = new List<Type>();
+            _handlerTypes = new Dictionary<string, List<Type>>();
+        }
+
         public void Publish<T>(T @event) where T : Event
         {
             var factory = new ConnectionFactory() { HostName = "localhost" };
@@ -105,7 +112,6 @@ namespace MicroRMQ.Bus
 
                     var handlerConcreteType = typeof(IEventHandler<>).MakeGenericType(eventType);
                     MethodInfo handle = handlerConcreteType.GetMethod("Handle");
-
                     await (Task)handle.Invoke(handlerObj, new object[] { eventObj });
                 }
             }
