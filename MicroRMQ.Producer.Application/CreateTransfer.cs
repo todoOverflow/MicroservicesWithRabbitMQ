@@ -27,7 +27,7 @@ namespace MicroRMQ.Producer.Application
             }
             public Task<Unit> Handle(Command request, CancellationToken cancellationToken)
             {
-                _bus.Publish(new TransferEvent(request.From, request.To, request.Amount));
+                _bus.Publish<TransferEvent>(new TransferEvent(request.From, request.To, request.Amount));
                 return Task.FromResult(Unit.Value);
             }
         }
